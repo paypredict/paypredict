@@ -12,5 +12,6 @@
     <modules>
         <module>defaults</module>
         <module>RServe</module>
+        <module>web</module>
     </modules>
 </project>

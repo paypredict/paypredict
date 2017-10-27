@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/RServe/RServe.iml" filepath="$PROJECT_DIR$/RServe/RServe.iml" />
       <module fileurl="file://$PROJECT_DIR$/defaults/defaults.iml" filepath="$PROJECT_DIR$/defaults/defaults.iml" />
       <module fileurl="file://$PROJECT_DIR$/paypredict.iml" filepath="$PROJECT_DIR$/paypredict.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web/web.iml" filepath="$PROJECT_DIR$/web/web.iml" />
     </modules>
   </component>
 </project>
