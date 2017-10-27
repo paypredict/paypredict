@@ -10,6 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="defaults" target="1.8" />
       <module name="paypredict" target="1.5" />
       <module name="RServe" target="1.8" />
     </bytecodeTargetLevel>

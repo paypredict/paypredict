@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RServe/RServe.iml" filepath="$PROJECT_DIR$/RServe/RServe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/defaults/defaults.iml" filepath="$PROJECT_DIR$/defaults/defaults.iml" />
       <module fileurl="file://$PROJECT_DIR$/paypredict.iml" filepath="$PROJECT_DIR$/paypredict.iml" />
     </modules>
   </component>
