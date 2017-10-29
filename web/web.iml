@@ -47,7 +47,13 @@
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.8.3" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin.external:gentyref:1.2.0.vaadin1" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-client-compiled:8.1.6" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-push:8.1.6" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin.external.atmosphere:atmosphere-runtime:2.4.11.vaadin2" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin.external.slf4j:vaadin-slf4j-jdk14:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-themes:8.1.6" level="project" />
+    <orderEntry type="module" module-name="RServe" />
+    <orderEntry type="library" name="Maven: org.rosuda.REngine:Rserve:1.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.rosuda.REngine:REngine:2.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.1.51" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test-junit:1.1.51" level="project" />
