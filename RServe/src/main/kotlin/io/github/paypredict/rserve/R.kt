@@ -11,31 +11,29 @@ import java.util.logging.Logger
  */
 object R {
     internal val installPath: String? by lazy {
-        fun windowsInstallPath(): String? {
-            ProcessBuilder()
-                    .apply {
-                        command("reg", "query", "HKLM\\Software\\R-core\\R")
-                        val outFile = File.createTempFile("R.InstallPath.", ".tmp")
-                        try {
-                            redirectOutput(outFile)
-                            start().also { process ->
-                                if (!process.waitFor(30, TimeUnit.SECONDS)) {
-                                    process.destroy()
-                                    throw IOException("${command()} timed out")
-                                }
-                            }
-                            outFile.useLines {
-                                for (line in it) {
-                                    val entry = line.trim().split("    REG_SZ    ")
-                                    if (entry.size == 2 && entry[0] == "InstallPath") return entry[1]
-                                }
-                            }
-                        } finally {
-                            outFile.delete()
-                        }
+        fun windowsInstallPath(): String? = System.getProperty("R.installPath", null) ?: ProcessBuilder().run {
+            command("reg", "query", "HKLM\\Software\\R-core\\R")
+            val outFile = File.createTempFile("R.installPath.", ".tmp")
+            try {
+                redirectOutput(outFile)
+                start().also { process ->
+                    if (!process.waitFor(30, TimeUnit.SECONDS)) {
+                        process.destroy()
+                        throw IOException("${command()} timed out")
                     }
-            return null
+                }
+                outFile.useLines {
+                    for (line in it) {
+                        val entry = line.trim().split("    REG_SZ    ")
+                        if (entry.size == 2 && entry[0] == "InstallPath") return entry[1]
+                    }
+                }
+            } finally {
+                outFile.delete()
+            }
+            null
         }
+
         windowsInstallPath()
     }
 
