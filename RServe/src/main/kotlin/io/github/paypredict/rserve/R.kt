@@ -10,6 +10,10 @@ import java.util.logging.Logger
  * Created by alexei.vylegzhanin@gmail.com on 10/26/2017.
  */
 object R {
+    internal val binPath: String? by lazy {
+        System.getProperty("R.binPath", null) ?: File(installPath).resolve("bin").absolutePath
+    }
+
     internal val installPath: String? by lazy {
         fun windowsInstallPath(): String? = System.getProperty("R.installPath", null) ?: ProcessBuilder().run {
             command("reg", "query", "HKLM\\Software\\R-core\\R")
@@ -38,9 +42,8 @@ object R {
     }
 
     fun <T> launch(vararg args: String, debug: Boolean = false, action: Process.() -> T): T {
-        val rExe = installPath?.let {
-            File(it).resolve("bin")
-                    .resolve("R.exe")
+        val rExe = binPath?.let {
+            File(it).resolve("R.exe")
                     .absoluteFile
                     .normalize()
         } ?: throw IOException("R not found")
