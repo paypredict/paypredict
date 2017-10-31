@@ -1,6 +1,10 @@
 package io.github.paypredict.web
 
 import io.github.paypredict.rserve.RServe
+import java.io.File
+import java.io.IOException
+import java.net.URI
+import java.nio.file.Files
 
 /**
  * <p>
@@ -34,7 +38,44 @@ class PanelQuestReport(rServe: RServe) : RServeSession(rServe) {
         }
     }
 
-    fun buildReport(cptCode: String, onFinish: (CommandStatus) -> Unit) {
-        invoke("buildReport.R", map = { "report.cpt.code <- '$cptCode'\n$it" }, onFinish = onFinish)
+
+    fun buildReport(cptCode: String, onFinish: (cmd: CommandStatus, url: String) -> Unit) {
+        val siteTempDir = Files.createTempDirectory("rss.report.site.").toFile()
+        homeDir.resolve("report.site").copyRecursively(siteTempDir)
+        invoke("buildReport.R", map = { script ->
+            """
+            report.cpt.code <- '$cptCode'
+            report.site <- '${siteTempDir.rPath}'
+            $script"""
+        }) { cmd ->
+
+            if (cmd.error == null) {
+                val cmdReportFileName = cmd.result!!.asString()
+                val properties = loadProperties(name = "report.site.properties") {
+                    setProperty("url", "http://localhost/rss/")
+                    setProperty("root", File("/PayPredict/web/rss/").absolutePath)
+                    true
+                }
+
+                val siteRoot = File(properties["root"] as String)
+                val siteURI = URI.create(properties["url"] as String)
+                val siteOut = siteTempDir.resolve("out")
+                if (siteOut.isDirectory) {
+                    val reportName = "$name.$cptCode.html"
+                    siteOut.copyRecursively(siteRoot, overwrite = false) { _, ioException ->
+                        when (ioException) {
+                            is FileAlreadyExistsException -> OnErrorAction.SKIP
+                            else -> throw ioException
+                        }
+                    }
+                    siteOut.resolve(cmdReportFileName).copyTo(siteRoot.resolve(reportName), overwrite = true)
+                    onFinish(cmd, siteURI.resolve(reportName).toASCIIString())
+                } else {
+                    onFinish(cmd.copy(error = IOException("site out directory not found: $siteOut")), "#")
+                }
+            } else {
+                onFinish(cmd, "#")
+            }
+        }
     }
 }

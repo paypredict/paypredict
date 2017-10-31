@@ -93,19 +93,12 @@ fun newWindowTopToolbar(caption: String): HorizontalLayout = HorizontalLayout().
 private val sessionLoginAttrName = "PayPredict/user"
 
 private val properties: Properties by lazy {
-    val file = payPredictHome
-            .resolve("PayPredictUI.properties")
-            .normalize()
-    Properties().apply {
-        if (file.isFile) {
-            file.inputStream().use { load(it) }
-        } else {
-            setProperty("user", "admin")
-            setProperty("password", ByteArray(8).let {
-                Random().nextBytes(it)
-                it.joinToString(separator = "") { it.toString(Character.MAX_RADIX) }
-            })
-            file.outputStream().use { store(it, null) }
-        }
+    loadProperties(name = "PayPredictUI.properties") {
+        setProperty("user", "admin")
+        setProperty("password", ByteArray(8).let {
+            Random().nextBytes(it)
+            it.joinToString(separator = "") { it.toString(Character.MAX_RADIX) }
+        })
+        true
     }
 }

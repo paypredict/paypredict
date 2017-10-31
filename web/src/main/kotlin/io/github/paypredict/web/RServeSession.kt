@@ -96,8 +96,8 @@ abstract class RServeSession(private val rServe: RServe) {
 
     open fun onShutdown(rServe: RServe) {}
 
-    private val name = javaClass.simpleName
-    private val homeDir: File = payPredictHome.resolve("rss").resolve(name)
+    protected val name = javaClass.simpleName
+    protected val homeDir: File = payPredictHome.resolve("rss").resolve(name)
 
     private fun File.resolve(path: Collection<String>): File {
         var result = this
