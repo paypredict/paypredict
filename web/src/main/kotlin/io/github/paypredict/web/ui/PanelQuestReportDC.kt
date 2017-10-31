@@ -4,6 +4,7 @@ import com.vaadin.icons.VaadinIcons
 import com.vaadin.server.ExternalResource
 import com.vaadin.ui.*
 import com.vaadin.ui.themes.ValoTheme
+import io.github.paypredict.web.CPT
 import io.github.paypredict.web.RSS
 import io.github.paypredict.web.RServeSession
 import org.rosuda.REngine.REXP
@@ -15,10 +16,6 @@ import org.rosuda.REngine.REXP
 class PanelQuestReportDC : VerticalLayout() {
     private val onStatusUpdated: (RServeSession) -> Unit
     private val onNewReport: (CPT, REXP) -> Unit
-
-    private class CPT(val code: String, val name: String) {
-        override fun toString(): String = "$code | $name"
-    }
 
     init {
         caption = "Panel Quest Report"
@@ -72,20 +69,10 @@ class PanelQuestReportDC : VerticalLayout() {
             }
         }
 
-        RSS.panelQuestReport.cptItems {
-            it.showResult {
-                val result = it.asNativeJavaObject() as? List<*>
-                if (result != null) {
-                    cptCode.setItems(result.mapNotNull {
-                        (it as? Array<*>)?.let {
-                            if (it.size >= 2) CPT(it[0].toString(), it[1].toString()) else null
-                        }
-                    }.toList())
-                    cptCode.isEnabled = true
-                } else {
-                    Notification.show("Invalid RSS.panelQuestReport.cptItems result: "
-                            + it.asNativeJavaObject(), Notification.Type.WARNING_MESSAGE)
-                }
+        RSS.panelQuestReport.cptItems { cmd, cptItems ->
+            cmd.showResult {
+                cptCode.setItems(cptItems)
+                cptCode.isEnabled = true
             }
         }
 
