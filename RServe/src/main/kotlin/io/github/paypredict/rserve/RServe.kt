@@ -13,7 +13,7 @@ class RServe(val host: String = "127.0.0.1",
              val port: Int = 6311,
              val debugR: Boolean = false,
              val debugRserve: Boolean = false
-): Closeable {
+) : Closeable {
 
     private fun connect(): RConnection = try {
         RConnection(host, port)
@@ -25,6 +25,11 @@ class RServe(val host: String = "127.0.0.1",
                 "--slave",
                 debug = debugR) {
             waitFor()
+            for (i in 1..99) try {
+                return@launch RConnection(host, port)
+            } catch (e: Exception) {
+                Thread.sleep(200)
+            }
             RConnection(host, port)
         }
     }

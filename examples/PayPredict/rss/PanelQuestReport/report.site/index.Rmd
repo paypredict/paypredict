@@ -1,0 +1,5 @@
+---
+title: "Empty Report"
+output: html_document
+---
+report.cpt.code = `r report.cpt.code`

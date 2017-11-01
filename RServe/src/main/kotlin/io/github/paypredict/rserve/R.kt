@@ -11,7 +11,9 @@ import java.util.logging.Logger
  */
 object R {
     internal val binPath: String? by lazy {
-        System.getProperty("R.binPath", null) ?: File(installPath).resolve("bin").absolutePath
+        System.getProperty("R.binPath", null) ?: installPath?.let {
+            File(it).resolve("bin").absolutePath
+        }
     }
 
     internal val installPath: String? by lazy {
@@ -41,7 +43,14 @@ object R {
         windowsInstallPath()
     }
 
-    fun <T> launch(vararg args: String, debug: Boolean = false, action: Process.() -> T): T {
+    internal val libsUser: Set<String> by lazy {
+        System.getProperty("R.libsUser", null)
+                ?.split(";")
+                ?.toSet()
+                ?: emptySet()
+    }
+
+    fun <T> launch(vararg args: String, debug: Boolean = false, rLibsUser: Set<String> = libsUser, action: Process.() -> T): T {
         val rExe = binPath?.let {
             File(it).resolve("R.exe")
                     .absoluteFile
@@ -52,6 +61,9 @@ object R {
                 .run {
                     command(rExe.absolutePath)
                     command() += args
+                    if (rLibsUser.isNotEmpty()) {
+                        environment() += "R_LIBS_USER" to rLibsUser.joinToString(separator = ";")
+                    }
                     if (debug) {
                         redirectOutput(ProcessBuilder.Redirect.INHERIT)
                         redirectError(ProcessBuilder.Redirect.INHERIT)
