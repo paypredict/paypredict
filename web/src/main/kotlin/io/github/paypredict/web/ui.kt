@@ -97,6 +97,23 @@ internal val payPredictHome: File by lazy {
     }
 }
 
+internal fun loadProperties(dir: File = payPredictHome, name: String = "PayPredict.properties", putDefaults: Properties.() -> Boolean = { false }): Properties {
+    val file = dir.resolve(name).normalize()
+    return Properties().apply {
+        if (file.isFile) {
+            file.inputStream().use { load(it) }
+        } else {
+            if (putDefaults()) {
+                file.outputStream().use { store(it, null) }
+            }
+        }
+    }
+}
+
+internal val File.rPath: String
+    get() = absolutePath.replace("\\", "/")
+
+
 private val sessionLoginAttrName = "PayPredict/user"
 
 private val properties: Properties by lazy {
