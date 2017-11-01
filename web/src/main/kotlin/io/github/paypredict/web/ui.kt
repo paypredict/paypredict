@@ -6,6 +6,7 @@ import com.vaadin.server.VaadinServlet
 import com.vaadin.server.VaadinSession
 import com.vaadin.ui.*
 import com.vaadin.ui.themes.ValoTheme
+import java.io.File
 import java.util.*
 import javax.servlet.annotation.WebServlet
 import kotlin.concurrent.thread
@@ -88,6 +89,12 @@ fun newWindowTopToolbar(caption: String): HorizontalLayout = HorizontalLayout().
         addStyleName(ValoTheme.LABEL_LARGE)
         addStyleName(ValoTheme.LABEL_BOLD)
     })
+}
+
+internal val payPredictHome: File by lazy {
+    File(System.getenv("PAY_PREDICT_HOME") ?: "/PayPredict").apply {
+        if (!exists()) mkdirs()
+    }
 }
 
 private val sessionLoginAttrName = "PayPredict/user"
