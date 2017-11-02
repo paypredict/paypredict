@@ -20,6 +20,9 @@ class UIServlet : VaadinServlet()
 
 fun UI.initWithLogin(caption: String, createContent: () -> Component) {
     val session: VaadinSession = VaadinSession.getCurrent() ?: throw AssertionError("Invalid context")
+    if (properties["password"] == null) {
+        session.setAttribute(sessionLoginAttrName, true)
+    }
     if (session.getAttribute(sessionLoginAttrName) != null) {
         content = createContent()
         return
