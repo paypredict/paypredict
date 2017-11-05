@@ -20,6 +20,7 @@ internal object RSS {
     private val opened = mutableListOf<RServeSession>()
     private var isOpened = false
     val panelQuestReport: PanelQuestReport by lazy { openSession(6314) { PanelQuestReport(it) } }
+    val downloadCptLinesWithNoEob: DownloadCptLinesWithNoEob by lazy { openSession(6315) { DownloadCptLinesWithNoEob(it) } }
 
     private inline fun <reified T : RServeSession> openSession(port: Int, create: (RServe) -> T): T = lock.withLock {
         if (!isOpened) throw AssertionError("Invalid RSS state")

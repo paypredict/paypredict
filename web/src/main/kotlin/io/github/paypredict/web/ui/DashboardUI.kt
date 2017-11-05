@@ -40,6 +40,7 @@ internal class DashboardUI : UI() {
                         setMargin(true)
                         addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING)
                         addComponent(PanelQuestReportDC().toDashboardComponent())
+                        addComponent(DownloadCptLinesWithNoEobDC().toDashboardComponent())
                     }
                 })
             }
