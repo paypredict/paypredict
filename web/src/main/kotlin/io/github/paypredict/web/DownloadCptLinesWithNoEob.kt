@@ -70,7 +70,13 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                                         createRow(row).apply {
                                             data.keys.forEachIndexed { index, key ->
                                                 createCell(index).apply {
-                                                    val value = (data[key] as? Array<*>)?.getOrNull(row - 1)
+                                                    val value = data[key]?.let {
+                                                        when(it) {
+                                                            is Array<*> -> it.getOrNull(row - 1)
+                                                            is DoubleArray -> it.getOrNull(row - 1)
+                                                            else -> null
+                                                        }
+                                                    }
                                                     when(value) {
                                                         null -> setCellValue(value as String?)
                                                         is Boolean -> setCellValue(value)
