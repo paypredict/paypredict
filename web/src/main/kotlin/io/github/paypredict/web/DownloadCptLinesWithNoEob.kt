@@ -111,7 +111,7 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                     val siteURI = URI.create(properties["url"] as String)
                     val siteWorkbookName = "${payer.safeFileName}.xlsx"
                     workbookFile.copyTo(siteRoot.resolve(name).apply { mkdirs() }.resolve(siteWorkbookName), overwrite = true)
-                    onFinish(cmd, siteURI.resolve(name).resolve(siteWorkbookName).toASCIIString())
+                    onFinish(cmd, siteURI.resolve(name + "/").resolve(siteWorkbookName).toASCIIString())
                 }
             } else {
                 onFinish(cmd, "#")
