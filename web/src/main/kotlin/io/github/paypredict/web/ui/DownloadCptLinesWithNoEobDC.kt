@@ -51,10 +51,10 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
                 isDisableOnClick = true
                 addClickListener { event ->
                     val cpt = payer.value
-                    rss.buildCSV(cpt.code) { cmd, url ->
+                    rss.build(cpt.code) { cmd, url ->
                         event.button.isEnabled = true
                         cmd.showResult {
-                            links.addComponent(Link("$cpt.csv", ExternalResource(url)).apply {
+                            links.addComponent(Link("$cpt.xlsx", ExternalResource(url)).apply {
                                 icon = VaadinIcons.EXTERNAL_LINK
                                 targetName = "_blank"
                             }, 0)

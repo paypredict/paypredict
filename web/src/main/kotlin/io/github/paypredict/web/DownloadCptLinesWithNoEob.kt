@@ -1,10 +1,12 @@
 package io.github.paypredict.web
 
 import io.github.paypredict.rserve.RServe
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
+import java.util.*
+
 
 /**
  * <p>
@@ -38,31 +40,68 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
         }
     }
 
-    fun buildCSV(payerCode: String, onFinish: (cmd: CommandStatus, csvURL: String) -> Unit) {
+    fun build(payerCode: String, onFinish: (cmd: CommandStatus, excelURL: String) -> Unit) {
         val tempDir = Files.createTempDirectory("rss.$name.").toFile()
-        invoke("buildCSV.R", map = { script ->
+        invoke("build.R", map = { script ->
             """
             ex_payer <- '$payerCode'
-            ex_dir_output <- '${tempDir.rPath}'
             $script"""
         }) { cmd ->
             if (cmd.error == null) {
-                val csvFileName = cmd.result!!.asString()
-                val properties = loadProperties(name = "report.site.properties") {
-                    setProperty("url", "http://localhost/rss/")
-                    setProperty("root", File("/PayPredict/web/rss/").absolutePath)
-                    true
-                }
-
-                val siteRoot = File(properties["root"] as String)
-                val siteURI = URI.create(properties["url"] as String)
-                val csvFile = tempDir.resolve(csvFileName)
-                if (csvFile.isFile) {
-                    val csvName = "$name.$payerCode.csv"
-                    csvFile.copyTo(siteRoot.resolve(csvName), overwrite = true)
-                    onFinish(cmd, siteURI.resolve(csvName).toASCIIString())
+                val data = cmd.result?.asNativeJavaObject() as? Map<*, *>
+                if (data == null) {
+                    onFinish(cmd.copy(error = AssertionError("Invalid result")), "#")
                 } else {
-                    onFinish(cmd.copy(error = IOException("csv file not found: $csvFile")), "#")
+                    val workbook = XSSFWorkbook().apply {
+                        createSheet().apply {
+                            if (data.keys.isNotEmpty()) {
+                                // header
+                                createRow(0).apply {
+                                    data.keys.forEachIndexed { index, value ->
+                                        createCell(index).apply {
+                                            setCellValue(value as? String)
+                                        }
+                                    }
+                                }
+                                // values
+                                val rows = (data.keys.first() as? Array<*>)?.size
+                                if (rows != null) {
+                                    for (row in 1..rows) {
+                                        createRow(0).apply {
+                                            data.keys.forEachIndexed { index, key ->
+                                                createCell(index).apply {
+                                                    val value = (data[key] as? Array<*>)?.getOrNull(row - 1)
+                                                    when(value) {
+                                                        null -> setCellValue(value as String?)
+                                                        is Boolean -> setCellValue(value)
+                                                        is String -> setCellValue(value)
+                                                        is Date -> setCellValue(value)
+                                                        is Number -> setCellValue(value.toDouble())
+                                                        else -> setCellValue(value.toString())
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    val workbookFile = tempDir.resolve("workbook.xlsx")
+                    workbookFile.outputStream().use { workbook.write(it) }
+
+                    val properties = loadProperties(name = "report.site.properties") {
+                        setProperty("url", "http://localhost/rss/")
+                        setProperty("root", File("/PayPredict/web/rss/").absolutePath)
+                        true
+                    }
+
+                    val siteRoot = File(properties["root"] as String)
+                    val siteURI = URI.create(properties["url"] as String)
+                    val siteWorkbookName = "$name.$payerCode.xlsx"
+                    workbookFile.copyTo(siteRoot.resolve(siteWorkbookName), overwrite = true)
+                    onFinish(cmd, siteURI.resolve(siteWorkbookName).toASCIIString())
                 }
             } else {
                 onFinish(cmd, "#")
