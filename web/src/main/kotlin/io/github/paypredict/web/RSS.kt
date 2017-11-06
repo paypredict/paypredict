@@ -53,7 +53,7 @@ internal object RSS {
     fun preload() = lock.withLock {
         preload = preload ?: thread(start = true, name = "RSS.preload()") {
             Thread.sleep(3000)
-            listOf(panelQuestReport).forEach {
+            listOf(panelQuestReport, downloadCptLinesWithNoEob).forEach {
                 log.info("${it.javaClass.name}.status = ${it.status}")
             }
         }
