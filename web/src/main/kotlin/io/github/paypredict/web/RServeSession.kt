@@ -4,6 +4,7 @@ import io.github.paypredict.rserve.RServe
 import org.rosuda.REngine.REXP
 import org.rosuda.REngine.Rserve.RConnection
 import org.rosuda.REngine.Rserve.RserveException
+import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.time.Duration
 import java.time.Instant
@@ -46,6 +47,13 @@ class ScheduledAction(val period: Duration, val path: Collection<String>) {
 abstract class RServeSession(private val rServe: RServe) {
     data class Status(val name: String, val error: Throwable? = null)
     data class CommandStatus(val status: Status, val scriptName: String, val result: REXP?, val error: Throwable?)
+
+    fun conf(): Map<String, Any> = homeDir.resolve("conf.yml").let {
+        when {
+            it.isFile -> it.inputStream().use { Yaml().load<Map<String, Any>>(it) }
+            else -> emptyMap()
+        }
+    }
 
     var status = Status("initializing")
         private set(value) {

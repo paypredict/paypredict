@@ -2,23 +2,26 @@ package io.github.paypredict.web.ui
 
 import com.vaadin.icons.VaadinIcons
 import com.vaadin.server.ExternalResource
+import com.vaadin.shared.ui.ContentMode
 import com.vaadin.ui.*
 import com.vaadin.ui.themes.ValoTheme
-import io.github.paypredict.web.CPT
 import io.github.paypredict.web.Payer
 import io.github.paypredict.web.RSS
 import io.github.paypredict.web.RServeSession
 import org.rosuda.REngine.REXP
+
 
 /**
  * <p>
  * Created by alexei.vylegzhanin@gmail.com on 11/04/2017.
  */
 class DownloadCptLinesWithNoEobDC : VerticalLayout() {
+    private val rss = RSS.downloadCptLinesWithNoEob
     private val onStatusUpdated: (RServeSession) -> Unit
 
     init {
-        caption = "Download CPT Lines with no EOB"
+        val conf = rss.conf()
+        caption = conf["title"] as? String ?: "Download CPT Lines with no EOB"
         setMargin(true)
         setWidth("32em")
         setHeightUndefined()
@@ -35,6 +38,11 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
             setSizeUndefined()
         }
 
+
+        (conf["description"] as? String)?.let {
+            addComponent(Label(it, ContentMode.HTML))
+        }
+
         addComponent(HorizontalLayout().apply {
             setWidth("100%")
             addComponentsAndExpand(payer)
@@ -43,7 +51,7 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
                 isDisableOnClick = true
                 addClickListener { event ->
                     val cpt = payer.value
-                    RSS.downloadCptLinesWithNoEob.buildCSV(cpt.code) { cmd, url ->
+                    rss.buildCSV(cpt.code) { cmd, url ->
                         event.button.isEnabled = true
                         cmd.showResult {
                             links.addComponent(Link("$cpt.csv", ExternalResource(url)).apply {
@@ -73,7 +81,7 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
             }
         }
 
-        RSS.downloadCptLinesWithNoEob.payerItems  { cmd, items ->
+        rss.payerItems  { cmd, items ->
             cmd.showResult {
                 payer.setItems(items)
                 payer.isEnabled = true
@@ -94,12 +102,12 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
 
     override fun attach() {
         super.attach()
-        RSS.downloadCptLinesWithNoEob.onStatusUpdated += onStatusUpdated
-        onStatusUpdated(RSS.downloadCptLinesWithNoEob)
+        rss.onStatusUpdated += onStatusUpdated
+        onStatusUpdated(rss)
     }
 
     override fun detach() {
-        RSS.downloadCptLinesWithNoEob.onStatusUpdated -= onStatusUpdated
+        rss.onStatusUpdated -= onStatusUpdated
         super.detach()
     }
 }

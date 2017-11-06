@@ -2,6 +2,7 @@ package io.github.paypredict.web.ui
 
 import com.vaadin.icons.VaadinIcons
 import com.vaadin.server.ExternalResource
+import com.vaadin.shared.ui.ContentMode
 import com.vaadin.ui.*
 import com.vaadin.ui.themes.ValoTheme
 import io.github.paypredict.web.CPT
@@ -14,10 +15,12 @@ import org.rosuda.REngine.REXP
  * Created by alexei.vylegzhanin@gmail.com on 10/28/2017.
  */
 class PanelQuestReportDC : VerticalLayout() {
+    private val rss = RSS.panelQuestReport
     private val onStatusUpdated: (RServeSession) -> Unit
 
     init {
-        caption = "Panel Quest Report"
+        val conf = rss.conf()
+        caption = conf["title"] as? String ?: "Panel Quest Report"
         setMargin(true)
         setWidth("32em")
         setHeightUndefined()
@@ -34,6 +37,10 @@ class PanelQuestReportDC : VerticalLayout() {
             setSizeUndefined()
         }
 
+        (conf["description"] as? String)?.let {
+            addComponent(Label(it, ContentMode.HTML))
+        }
+
         addComponent(HorizontalLayout().apply {
             setWidth("100%")
             addComponentsAndExpand(cptCode)
@@ -42,7 +49,7 @@ class PanelQuestReportDC : VerticalLayout() {
                 isDisableOnClick = true
                 addClickListener { event ->
                     val cpt = cptCode.value
-                    RSS.panelQuestReport.buildReport(cpt.code) { cmd, url ->
+                    rss.buildReport(cpt.code) { cmd, url ->
                         event.button.isEnabled = true
                         cmd.showResult {
                             links.addComponent(Link("$cpt Report", ExternalResource(url)).apply {
@@ -72,7 +79,7 @@ class PanelQuestReportDC : VerticalLayout() {
             }
         }
 
-        RSS.panelQuestReport.cptItems { cmd, cptItems ->
+        rss.cptItems { cmd, cptItems ->
             cmd.showResult {
                 cptCode.setItems(cptItems)
                 cptCode.isEnabled = true
@@ -93,12 +100,12 @@ class PanelQuestReportDC : VerticalLayout() {
 
     override fun attach() {
         super.attach()
-        RSS.panelQuestReport.onStatusUpdated += onStatusUpdated
-        onStatusUpdated(RSS.panelQuestReport)
+        rss.onStatusUpdated += onStatusUpdated
+        onStatusUpdated(rss)
     }
 
     override fun detach() {
-        RSS.panelQuestReport.onStatusUpdated -= onStatusUpdated
+        rss.onStatusUpdated -= onStatusUpdated
         super.detach()
     }
 }
