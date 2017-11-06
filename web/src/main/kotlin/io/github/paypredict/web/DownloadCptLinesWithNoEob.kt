@@ -68,6 +68,7 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                                     when (it) {
                                         is Array<*> -> it.size
                                         is DoubleArray -> it.size
+                                        is IntArray -> it.size
                                         else -> 0
                                     }
                                 }
@@ -79,6 +80,7 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                                                     when (it) {
                                                         is Array<*> -> it.getOrNull(row - 1)
                                                         is DoubleArray -> it.getOrNull(row - 1)
+                                                        is IntArray -> it.getOrNull(row - 1)
                                                         else -> null
                                                     }
                                                 }
