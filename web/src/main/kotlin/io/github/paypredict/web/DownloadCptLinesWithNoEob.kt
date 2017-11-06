@@ -64,10 +64,10 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                                     }
                                 }
                                 // values
-                                val rows = (data.keys.first() as? Array<*>)?.size
+                                val rows = (data.values.first() as? Array<*>)?.size
                                 if (rows != null) {
                                     for (row in 1..rows) {
-                                        createRow(0).apply {
+                                        createRow(row).apply {
                                             data.keys.forEachIndexed { index, key ->
                                                 createCell(index).apply {
                                                     val value = (data[key] as? Array<*>)?.getOrNull(row - 1)
