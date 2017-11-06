@@ -40,11 +40,11 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
         }
     }
 
-    fun build(payerCode: String, onFinish: (cmd: CommandStatus, excelURL: String) -> Unit) {
+    fun build(payer: Payer, onFinish: (cmd: CommandStatus, excelURL: String) -> Unit) {
         val tempDir = Files.createTempDirectory("rss.$name.").toFile()
         invoke("build.R", map = { script ->
             """
-            ex_payer <- '$payerCode'
+            ex_payer <- '${payer.code}'
             $script"""
         }) { cmd ->
             if (cmd.error == null) {
@@ -64,27 +64,31 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
                                     }
                                 }
                                 // values
-                                val rows = (data.values.first() as? Array<*>)?.size
-                                if (rows != null) {
-                                    for (row in 1..rows) {
-                                        createRow(row).apply {
-                                            data.keys.forEachIndexed { index, key ->
-                                                createCell(index).apply {
-                                                    val value = data[key]?.let {
-                                                        when(it) {
-                                                            is Array<*> -> it.getOrNull(row - 1)
-                                                            is DoubleArray -> it.getOrNull(row - 1)
-                                                            else -> null
-                                                        }
+                                val rows = data.values.first().let {
+                                    when (it) {
+                                        is Array<*> -> it.size
+                                        is DoubleArray -> it.size
+                                        else -> 0
+                                    }
+                                }
+                                for (row in 1..rows) {
+                                    createRow(row).apply {
+                                        data.keys.forEachIndexed { index, key ->
+                                            createCell(index).apply {
+                                                val value = data[key]?.let {
+                                                    when (it) {
+                                                        is Array<*> -> it.getOrNull(row - 1)
+                                                        is DoubleArray -> it.getOrNull(row - 1)
+                                                        else -> null
                                                     }
-                                                    when(value) {
-                                                        null -> setCellValue(value as String?)
-                                                        is Boolean -> setCellValue(value)
-                                                        is String -> setCellValue(value)
-                                                        is Date -> setCellValue(value)
-                                                        is Number -> setCellValue(value.toDouble())
-                                                        else -> setCellValue(value.toString())
-                                                    }
+                                                }
+                                                when (value) {
+                                                    null -> setCellValue(value as String?)
+                                                    is Boolean -> setCellValue(value)
+                                                    is String -> setCellValue(value)
+                                                    is Date -> setCellValue(value)
+                                                    is Number -> setCellValue(value.toDouble())
+                                                    else -> setCellValue(value.toString())
                                                 }
                                             }
                                         }
@@ -105,9 +109,9 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
 
                     val siteRoot = File(properties["root"] as String)
                     val siteURI = URI.create(properties["url"] as String)
-                    val siteWorkbookName = "$name.$payerCode.xlsx"
-                    workbookFile.copyTo(siteRoot.resolve(siteWorkbookName), overwrite = true)
-                    onFinish(cmd, siteURI.resolve(siteWorkbookName).toASCIIString())
+                    val siteWorkbookName = "${payer.safeFileName}.xlsx"
+                    workbookFile.copyTo(siteRoot.resolve(name).apply { mkdirs() }.resolve(siteWorkbookName), overwrite = true)
+                    onFinish(cmd, siteURI.resolve(name).resolve(siteWorkbookName).toASCIIString())
                 }
             } else {
                 onFinish(cmd, "#")
