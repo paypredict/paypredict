@@ -9,6 +9,7 @@ import io.github.paypredict.web.Payer
 import io.github.paypredict.web.RSS
 import io.github.paypredict.web.RServeSession
 import org.rosuda.REngine.REXP
+import java.net.URL
 
 
 /**
@@ -51,12 +52,14 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
                 isDisableOnClick = true
                 addClickListener { event ->
                     val payer1 = payer.value
-                    rss.build(payer1) { cmd, url ->
+                    rss.buildCSV(payer1) { cmd, url ->
                         event.button.isEnabled = true
                         cmd.showResult {
-                            links.addComponent(Link(payer1.safeFileName, ExternalResource(url)).apply {
+                            links.addComponent(Link().apply {
                                 icon = VaadinIcons.EXTERNAL_LINK
                                 targetName = "_blank"
+                                caption = url?.path?.split("/")?.last() ?: "?"
+                                resource = ExternalResource(url?.toURL()?: URL("#"))
                             }, 0)
                         }
                     }
