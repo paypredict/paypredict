@@ -5,7 +5,6 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
-import java.time.Duration
 
 /**
  * <p>
@@ -17,16 +16,7 @@ class PanelQuestReport(rServe: RServe) : RServeSession(rServe) {
             dir_rss_scripts = "${homeDir.rPath}"
         """.trimIndent())
         invokeDir("init")
-        homeDir.resolve("scheduler")
-                .listFiles { file: File -> file.isFile && file.name.toUpperCase().endsWith(".R") }
-                ?.forEach { file ->
-                    file.name.split(" ").let {
-                        if (it.size > 1) {
-                            val period = Duration.parse(it[0])
-                            scheduledActions += ScheduledAction(period, listOf(file.parentFile.name, file.name))
-                        }
-                    }
-                }
+        initScheduler()
     }
 
     fun cptItems(onFinish: (CommandStatus, List<CPT>) -> Unit) {

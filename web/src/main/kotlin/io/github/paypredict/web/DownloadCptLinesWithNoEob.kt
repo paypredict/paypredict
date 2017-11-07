@@ -17,6 +17,7 @@ class DownloadCptLinesWithNoEob(rServe: RServe) : RServeSession(rServe) {
             dir_rss_scripts = "${homeDir.rPath}"
         """.trimIndent())
         invokeDir("init")
+        initScheduler()
     }
 
     fun payerItems(onFinish: (CommandStatus, List<Payer>) -> Unit) {

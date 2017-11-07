@@ -168,4 +168,17 @@ abstract class RServeSession(private val rServe: RServe) {
                 }
     }
 
+    protected fun initScheduler() {
+        homeDir.resolve("scheduler")
+                .listFiles { file: File -> file.isFile && file.name.toUpperCase().endsWith(".R") }
+                ?.forEach { file ->
+                    file.name.split(" ").let {
+                        if (it.size > 1) {
+                            val period = Duration.parse(it[0])
+                            scheduledActions += ScheduledAction(period, listOf(file.parentFile.name, file.name))
+                        }
+                    }
+                }
+    }
+
 }
