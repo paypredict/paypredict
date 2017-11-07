@@ -3,6 +3,8 @@ package io.github.paypredict.web.ui
 import com.vaadin.annotations.Push
 import com.vaadin.annotations.Title
 import com.vaadin.annotations.VaadinServletConfiguration
+import com.vaadin.icons.VaadinIcons
+import com.vaadin.server.ExternalResource
 import com.vaadin.server.VaadinRequest
 import com.vaadin.server.VaadinServlet
 import com.vaadin.ui.*
@@ -25,31 +27,58 @@ class PPUIServlet : VaadinServlet()
 @Title(UI_CAPTION)
 @Push
 internal class DashboardUI : UI() {
+    private val dcMap = mapOf<String, () -> DashboardComponent>(
+            PanelQuestReportDC.name to { PanelQuestReportDC() },
+            DownloadCptLinesWithNoEobDC.name to { DownloadCptLinesWithNoEobDC() }
+    )
+
     override fun init(request: VaadinRequest) {
         initWithLogin(UI_CAPTION) {
             VerticalLayout().apply {
                 setSizeFull()
-                initWindowTopToolbar(UI_CAPTION)
+                val dc = page.uriFragment?.let { dcMap[it] }?.invoke()
+                val title = dc?.title ?: UI_CAPTION
+                page.setTitle(title)
+                initWindowTopToolbar(title)
 
                 addComponentsAndExpand(Panel().apply {
                     setSizeFull()
                     addStyleName(ValoTheme.PANEL_BORDERLESS)
 
-                    content = HorizontalLayout().apply {
+                    content = dc?.component ?: HorizontalLayout().apply {
                         setSizeUndefined()
                         setMargin(true)
                         addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING)
-                        addComponent(PanelQuestReportDC().toDashboardComponent())
-                        addComponent(DownloadCptLinesWithNoEobDC().toDashboardComponent())
+                        dcMap.values.forEach {
+                            addComponent(it().toDashboardComponent())
+                        }
                     }
                 })
             }
         }
     }
 
-    private fun Component.toDashboardComponent(): Component = Panel(caption).also {
-        it.setSizeUndefined()
-        it.content = this
+    private fun DashboardComponent.toDashboardComponent(): Component = VerticalLayout().apply {
+        setSizeUndefined()
+        addStyleName(ValoTheme.LAYOUT_CARD)
+        setMargin(false)
+
+        addComponent(HorizontalLayout().apply {
+            setWidth("100%")
+            addStyleName("v-panel-caption")
+
+            addComponentsAndExpand(Label(title))
+            addComponent(Link().apply {
+                icon = VaadinIcons.EXTERNAL_LINK
+                resource = ExternalResource("#$name")
+                targetName = "_blank"
+            })
+        })
+        addComponent(VerticalLayout().apply {
+            setSizeUndefined()
+            setMargin(false)
+            addComponent(component)
+        })
     }
 }
 

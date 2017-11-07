@@ -16,13 +16,19 @@ import java.net.URL
  * <p>
  * Created by alexei.vylegzhanin@gmail.com on 11/04/2017.
  */
-class DownloadCptLinesWithNoEobDC : VerticalLayout() {
-    private val rss = RSS.downloadCptLinesWithNoEob
+class DownloadCptLinesWithNoEobDC : DashboardComponent, VerticalLayout() {
+    companion object DC {
+        private val rss = RSS.downloadCptLinesWithNoEob
+        val name: String = rss.javaClass.simpleName
+    }
+
     private val onStatusUpdated: (RServeSession) -> Unit
 
+    override val name: String = DC.name
+    override val title: String by lazy { rss.conf()["title"] as? String ?: "Panel Quest Report"  }
+    override val component: Component = this
+
     init {
-        val conf = rss.conf()
-        caption = conf["title"] as? String ?: "Download CPT Lines with no EOB"
         setMargin(true)
         setWidth("32em")
         setHeightUndefined()
@@ -40,7 +46,7 @@ class DownloadCptLinesWithNoEobDC : VerticalLayout() {
         }
 
 
-        (conf["description"] as? String)?.let {
+        (rss.conf()["description"] as? String)?.let {
             addComponent(Label(it, ContentMode.HTML))
         }
 
